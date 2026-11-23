@@ -1,0 +1,37 @@
+name: Terraform Validation CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Lint & Validate HCL
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Initialize & Validate Root Module
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Initialize & Validate Environments
+        run: |
+          for env in environments/dev environments/prod; do
+            if [ -d "$env" ]; then
+              echo "Validating environment: $env..."
+              (cd "$env" && terraform init -backend=false && terraform validate)
+            fi
+          done
