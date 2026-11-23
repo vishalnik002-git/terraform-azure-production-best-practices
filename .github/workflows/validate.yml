@@ -24,7 +24,7 @@ jobs:
 
       - name: Initialize & Validate Root Module
         run: |
-          terraform init -backend=false
+          terraform init -backend=false -upgrade
           terraform validate
 
       - name: Initialize & Validate Environments
@@ -32,6 +32,6 @@ jobs:
           for env in environments/dev environments/prod; do
             if [ -d "$env" ]; then
               echo "Validating environment: $env..."
-              (cd "$env" && terraform init -backend=false && terraform validate)
+              (cd "$env" && terraform init -backend=false -upgrade && terraform validate)
             fi
           done
